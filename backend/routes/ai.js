@@ -38,8 +38,18 @@ function withTimeout(promise, ms) {
   ]);
 }
 
+let lastRateLimitTime = 0;
+
 // Retry helper — retries with short waits to let rate limits clear
-async function aiGenerate(fn, timeoutMs = 20000) {
+async function aiGenerate(fn, timeoutMs = 25000) {
+  // If we were rate-limited in the last 30 seconds, wait before even trying
+  const timeSinceLimit = Date.now() - lastRateLimitTime;
+  if (timeSinceLimit < 30000) {
+    const waitMs = 30000 - timeSinceLimit;
+    console.log(`Cooling down ${Math.ceil(waitMs / 1000)}s from last rate limit...`);
+    await new Promise(r => setTimeout(r, waitMs));
+  }
+
   const errors = [];
   for (let attempt = 0; attempt < 2; attempt++) {
     for (const modelName of MODEL_CHAIN) {
@@ -56,13 +66,14 @@ async function aiGenerate(fn, timeoutMs = 20000) {
         const isTimeout = err.message?.includes('timed out');
         console.error(`AI attempt ${attempt + 1} with ${modelName}:`, err.message?.substring(0, 150));
         errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
+        if (is429) lastRateLimitTime = Date.now();
         if (!is429 && !isTimeout) throw err;
       }
     }
     // Wait before retrying all models again
     if (attempt < 1) {
-      console.log('All models rate-limited. Waiting 8s before retry...');
-      await new Promise(r => setTimeout(r, 8000));
+      console.log('All models rate-limited. Waiting 15s before retry...');
+      await new Promise(r => setTimeout(r, 15000));
     }
   }
   throw new Error('AI rate limited — all models are temporarily unavailable. Please wait a minute and try again.');

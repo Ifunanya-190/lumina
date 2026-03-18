@@ -210,7 +210,7 @@ const AIMentor = () => {
                     )}
                     {/* Action buttons */}
                     {!isEditing && (
-                      <div className={`flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`flex items-center gap-1 mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
                         <button
                           onClick={() => handleCopy(msg.content, i)}
                           className="p-1.5 rounded-md text-white/25 hover:text-white/60 hover:bg-white/5 transition-colors"
