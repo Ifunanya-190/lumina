@@ -11,9 +11,12 @@ const { router: authRoutes } = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean)
+  : true;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json({ limit: '10mb' }));
 
 // Static files for tutorial images
