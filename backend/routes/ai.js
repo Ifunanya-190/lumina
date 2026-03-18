@@ -128,7 +128,7 @@ router.post('/chat', auth, async (req, res) => {
     res.json({ reply, ai_powered: !!genAI });
   } catch (err) {
     console.error('AI chat error:', err.message);
-    const reply = `**Lumina is temporarily busy** \u2014 The AI is rate-limited right now.\n\nPlease wait about 30-60 seconds and try again. Your question was great, I just need a moment!\n\n_Error: ${err.message?.substring(0, 100)}_`;
+    const reply = `**Lumina is temporarily busy** — The AI is rate-limited right now.\n\nPlease wait about 30-60 seconds and try again. Your question was great, I just need a moment!\n\n_Error: ${err.message?.substring(0, 100)}_`;
     await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
     res.json({ reply, ai_powered: false, rate_limited: true });
   }
