@@ -7,7 +7,7 @@ const router = express.Router();
 
 let genAI = null;
 let model = null;
-const MODEL_CHAIN = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
+const MODEL_CHAIN = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemma-3-4b-it'];
 let activeModelName = '';
 
 // Initialize Gemini if API key is available
