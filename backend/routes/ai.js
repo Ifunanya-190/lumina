@@ -7,7 +7,7 @@ const router = express.Router();
 
 let genAI = null;
 let model = null;
-const MODEL_CHAIN = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
+const MODEL_CHAIN = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
 let activeModelName = '';
 
 // Initialize Gemini if API key is available
@@ -38,24 +38,31 @@ function withTimeout(promise, ms) {
   ]);
 }
 
-// Retry helper — tries each model once, fails fast if all are rate-limited
+// Retry helper — retries with short waits to let rate limits clear
 async function aiGenerate(fn, timeoutMs = 20000) {
   const errors = [];
-  for (const modelName of MODEL_CHAIN) {
-    try {
-      const currentModel = genAI.getGenerativeModel({ model: modelName });
-      const result = await withTimeout(fn(currentModel), timeoutMs);
-      if (modelName !== activeModelName) {
-        activeModelName = modelName;
-        model = currentModel;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    for (const modelName of MODEL_CHAIN) {
+      try {
+        const currentModel = genAI.getGenerativeModel({ model: modelName });
+        const result = await withTimeout(fn(currentModel), timeoutMs);
+        if (modelName !== activeModelName) {
+          activeModelName = modelName;
+          model = currentModel;
+        }
+        return result;
+      } catch (err) {
+        const is429 = err.message && err.message.includes('429');
+        const isTimeout = err.message?.includes('timed out');
+        console.error(`AI attempt ${attempt + 1} with ${modelName}:`, err.message?.substring(0, 150));
+        errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
+        if (!is429 && !isTimeout) throw err;
       }
-      return result;
-    } catch (err) {
-      const is429 = err.message && err.message.includes('429');
-      const isTimeout = err.message?.includes('timed out');
-      console.error(`AI attempt with ${modelName}:`, err.message?.substring(0, 150));
-      errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
-      if (!is429 && !isTimeout) throw err;
+    }
+    // Wait before retrying all models again
+    if (attempt < 1) {
+      console.log('All models rate-limited. Waiting 8s before retry...');
+      await new Promise(r => setTimeout(r, 8000));
     }
   }
   throw new Error('AI rate limited — all models are temporarily unavailable. Please wait a minute and try again.');
