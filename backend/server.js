@@ -42,6 +42,17 @@ async function start() {
   app.listen(PORT, () => {
     console.log(`\n✨ Lumina Backend running on http://localhost:${PORT}`);
     console.log(`📡 API available at http://localhost:${PORT}/api`);
+
+    // Self-ping every 14 minutes to prevent Render free tier from sleeping
+    if (process.env.RENDER_EXTERNAL_URL) {
+      const https = require('https');
+      setInterval(() => {
+        https.get(`${process.env.RENDER_EXTERNAL_URL}/api/health`, (res) => {
+          console.log(`Keep-alive ping: ${res.statusCode}`);
+        }).on('error', () => {});
+      }, 14 * 60 * 1000);
+      console.log('Keep-alive ping enabled (every 14 min)');
+    }
   });
 }
 
