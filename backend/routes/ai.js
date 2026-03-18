@@ -1,6 +1,8 @@
 const express = require('express');
 const ChatHistory = require('../models/ChatHistory');
 const Tutorial = require('../models/Tutorial');
+const User = require('../models/User');
+const { auth, optionalAuth } = require('./auth');
 const router = express.Router();
 
 let genAI = null;
@@ -36,32 +38,24 @@ function withTimeout(promise, ms) {
   ]);
 }
 
-// Retry helper — waits for rate limits to clear
-async function aiGenerate(fn, timeoutMs = 30000) {
+// Retry helper — tries each model once, fails fast if all are rate-limited
+async function aiGenerate(fn, timeoutMs = 20000) {
   const errors = [];
-  for (let attempt = 0; attempt < 3; attempt++) {
-    for (const modelName of MODEL_CHAIN) {
-      try {
-        const currentModel = genAI.getGenerativeModel({ model: modelName });
-        const result = await withTimeout(fn(currentModel), timeoutMs);
-        if (modelName !== activeModelName) {
-          activeModelName = modelName;
-          model = currentModel;
-        }
-        return result;
-      } catch (err) {
-        const is429 = err.message && err.message.includes('429');
-        const isTimeout = err.message?.includes('timed out');
-        console.error(`AI attempt ${attempt + 1} with ${modelName}:`, err.message?.substring(0, 150));
-        errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
-        if (!is429 && !isTimeout) throw err;
+  for (const modelName of MODEL_CHAIN) {
+    try {
+      const currentModel = genAI.getGenerativeModel({ model: modelName });
+      const result = await withTimeout(fn(currentModel), timeoutMs);
+      if (modelName !== activeModelName) {
+        activeModelName = modelName;
+        model = currentModel;
       }
-    }
-    // Wait before retrying all models again
-    if (attempt < 2) {
-      const waitSec = (attempt + 1) * 10; // 10s, then 20s
-      console.log(`All models rate-limited. Waiting ${waitSec}s before retry ${attempt + 2}...`);
-      await new Promise(r => setTimeout(r, waitSec * 1000));
+      return result;
+    } catch (err) {
+      const is429 = err.message && err.message.includes('429');
+      const isTimeout = err.message?.includes('timed out');
+      console.error(`AI attempt with ${modelName}:`, err.message?.substring(0, 150));
+      errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
+      if (!is429 && !isTimeout) throw err;
     }
   }
   throw new Error('AI rate limited — all models are temporarily unavailable. Please wait a minute and try again.');
@@ -82,19 +76,25 @@ End responses with a helpful suggestion or question to keep the conversation goi
 When someone greets you (hello, hi, hey, etc.), greet them warmly by their name if provided.`;
 
 // POST chat with AI mentor
-router.post('/chat', async (req, res) => {
-  const { message, context, username } = req.body;
+router.post('/chat', auth, async (req, res) => {
+  const { message, context } = req.body;
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  await ChatHistory.create({ role: 'user', content: message, context: context || null });
+  const userId = req.user.id;
+
+  // Look up the user's display name from the database
+  const dbUser = await User.findById(userId).select('display_name username');
+  const displayName = dbUser?.display_name || dbUser?.username || '';
+
+  await ChatHistory.create({ user: userId, role: 'user', content: message, context: context || null });
 
   try {
     let reply;
 
     if (genAI) {
-      const history = await ChatHistory.find().sort('-createdAt').limit(11);
+      const history = await ChatHistory.find({ user: userId }).sort('-createdAt').limit(11);
       const ordered = history.reverse();
 
       let chatHistory = ordered.slice(0, -1).map(h => ({
@@ -107,7 +107,7 @@ router.post('/chat', async (req, res) => {
       }
 
       let systemText = SYSTEM_PROMPT;
-      if (username) systemText += `\n\nThe user's name is ${username}. Address them by name when greeting.`;
+      if (displayName) systemText += `\n\nThe user's name is ${displayName}. Address them by name when greeting.`;
       if (context) systemText += `\n\nCurrent context: The user is viewing: ${context}`;
 
       const result = await aiGenerate(async (currentModel) => {
@@ -123,13 +123,13 @@ router.post('/chat', async (req, res) => {
       reply = getFallbackResponse(message);
     }
 
-    await ChatHistory.create({ role: 'assistant', content: reply });
+    await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
 
     res.json({ reply, ai_powered: !!genAI });
   } catch (err) {
     console.error('AI chat error:', err.message);
     const reply = `**Lumina is temporarily busy** \u2014 The AI is rate-limited right now.\n\nPlease wait about 30-60 seconds and try again. Your question was great, I just need a moment!\n\n_Error: ${err.message?.substring(0, 100)}_`;
-    await ChatHistory.create({ role: 'assistant', content: reply });
+    await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
     res.json({ reply, ai_powered: false, rate_limited: true });
   }
 });
@@ -232,10 +232,10 @@ router.post('/explain', async (req, res) => {
 });
 
 // GET chat history
-router.get('/history', async (req, res) => {
+router.get('/history', auth, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
-    const history = await ChatHistory.find().sort('-createdAt').limit(limit);
+    const history = await ChatHistory.find({ user: req.user.id }).sort('-createdAt').limit(limit);
     res.json(history.reverse());
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -243,9 +243,9 @@ router.get('/history', async (req, res) => {
 });
 
 // DELETE clear chat history
-router.delete('/history', async (req, res) => {
+router.delete('/history', auth, async (req, res) => {
   try {
-    await ChatHistory.deleteMany({});
+    await ChatHistory.deleteMany({ user: req.user.id });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });

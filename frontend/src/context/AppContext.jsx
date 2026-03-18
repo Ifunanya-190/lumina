@@ -60,12 +60,16 @@ export function AppProvider({ children }) {
   // Fetch initial data
   useEffect(() => {
     const ax = api();
-    Promise.all([
+    const fetches = [
       ax.get('/tutorials').then(r => setTutorials(r.data)),
       ax.get('/ai/status').then(r => setAiStatus(r.data)),
       ax.get('/tutorials/meta/stats').then(r => setStats(r.data)),
-      ax.get('/ai/history').then(r => setChatMessages(r.data.map(m => ({ role: m.role, content: m.content })))),
-    ]).catch(err => console.error('Failed to connect to backend:', err))
+    ];
+    // Only fetch chat history if logged in (requires auth)
+    if (token) {
+      fetches.push(ax.get('/ai/history').then(r => setChatMessages(r.data.map(m => ({ role: m.role, content: m.content })))));
+    }
+    Promise.all(fetches).catch(err => console.error('Failed to connect to backend:', err))
       .finally(() => setLoading(false));
   }, [api]);
 
@@ -113,8 +117,7 @@ export function AppProvider({ children }) {
     setChatMessages(prev => [...prev, userMsg]);
 
     try {
-      const displayName = user?.display_name || user?.username || '';
-      const { data } = await api().post('/ai/chat', { message, context, username: displayName });
+      const { data } = await api().post('/ai/chat', { message, context });
       const aiMsg = { role: 'assistant', content: data.reply };
       setChatMessages(prev => [...prev, aiMsg]);
       return data;
