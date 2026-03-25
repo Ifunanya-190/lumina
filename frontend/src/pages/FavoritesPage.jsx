@@ -9,12 +9,12 @@ const FavoritesPage = () => {
   if (!isLoggedIn) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-gold/20 to-orange-400/20 flex items-center justify-center mx-auto mb-6">
-          <FaBookmark className="text-3xl text-aurora-gold" />
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-cyan/20 via-aurora-blue/20 to-aurora-pink/20 flex items-center justify-center mx-auto mb-6">
+          <FaBookmark className="text-3xl text-aurora-cyan" />
         </div>
         <h1 className="text-2xl font-bold text-white mb-3">Sign In to View Favorites</h1>
         <p className="text-white/40 mb-6">Save tutorials you love and access them anytime.</p>
-        <Link to="/auth" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all">
+        <Link to="/auth" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all">
           Sign In
         </Link>
       </div>

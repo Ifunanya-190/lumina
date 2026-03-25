@@ -6,7 +6,10 @@ import { FaBrain, FaBars, FaTimes, FaUser } from 'react-icons/fa';
 const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/tutorials', label: 'Explore' },
-  { to: '/ai-lab', label: 'AI Lab' },
+  { to: '/ai-lab', label: 'Studio' },
+  { to: '/journey', label: 'Journey' },
+  { to: '/practice', label: 'Practice' },
+  { to: '/dream-builder', label: 'Dream Builder' },
 ];
 
 const Header = () => {
@@ -52,7 +55,7 @@ const Header = () => {
                   >
                     {label}
                     {active && (
-                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-blue" />
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink" />
                     )}
                   </Link>
                 );
@@ -70,7 +73,7 @@ const Header = () => {
                   }
                   setChatOpen(true);
                 }}
-                className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white text-sm font-semibold shadow-lg hover:shadow-aurora-blue/30 transition-all hover:scale-105 active:scale-95"
+                className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white text-sm font-semibold shadow-lg hover:shadow-aurora-cyan/30 transition-all hover:scale-105 active:scale-95"
               >
                 <FaBrain className="text-sm" />
                 <span className="hidden sm:inline">Ask Lumina</span>
@@ -82,7 +85,7 @@ const Header = () => {
                   to="/profile"
                   className="flex items-center gap-2 px-3 py-2 rounded-xl glass text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aurora-cyan to-aurora-blue flex items-center justify-center text-white text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink flex items-center justify-center text-white text-xs">
                     <FaUser />
                   </div>
                   <span className="hidden sm:inline text-xs font-medium">{user?.display_name || user?.username}</span>

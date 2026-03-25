@@ -81,13 +81,13 @@ const AIMentor = () => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan to-aurora-blue flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink flex items-center justify-center">
                 <FaBrain className="text-white text-lg" />
               </div>
               <div>
                 <h3 className="font-bold text-white text-sm">Lumina</h3>
                 <span className="text-[11px] text-white/40 flex items-center gap-1.5">
-                  <span className={`w-1.5 h-1.5 rounded-full ${aiStatus?.ai_available ? 'bg-aurora-green' : 'bg-aurora-gold'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${aiStatus?.ai_available ? 'bg-aurora-green' : 'bg-aurora-cyan'}`} />
                   {aiStatus?.ai_available ? 'Online' : 'Offline'}
                 </span>
               </div>
@@ -113,30 +113,30 @@ const AIMentor = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {!isLoggedIn ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-blue/20 to-aurora-cyan/20 flex items-center justify-center mb-4">
-                  <FaLock className="text-3xl text-aurora-gold" />
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-blue/20 flex items-center justify-center mb-4">
+                  <FaLock className="text-3xl text-aurora-cyan" />
                 </div>
                 <h4 className="text-white font-semibold mb-2">Sign In Required</h4>
                 <p className="text-white/40 text-sm mb-6">Create an account or sign in to chat with Lumina and get personalized learning guidance.</p>
                 <Link
                   to="/auth"
                   onClick={() => setChatOpen(false)}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all"
                 >
                   Sign In to Chat
                 </Link>
               </div>
             ) : user?.skill_level === 'undecided' ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-gold/20 to-orange-400/20 flex items-center justify-center mb-4">
-                  <FaBrain className="text-3xl text-aurora-gold" />
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-cyan/20 via-aurora-blue/20 to-aurora-pink/20 flex items-center justify-center mb-4">
+                  <FaBrain className="text-3xl text-aurora-cyan" />
                 </div>
                 <h4 className="text-white font-semibold mb-2">Complete Your Assessment</h4>
                 <p className="text-white/40 text-sm mb-6">Take a quick skill assessment first so Lumina can personalize your experience.</p>
                 <Link
                   to="/assessment"
                   onClick={() => setChatOpen(false)}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-gold to-orange-400 text-nebula-900 font-semibold hover:shadow-lg transition-all"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all"
                 >
                   Take Assessment
                 </Link>
@@ -145,11 +145,11 @@ const AIMentor = () => {
             <>
             {chatMessages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-blue/20 to-aurora-cyan/20 flex items-center justify-center mb-4">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-blue/20 flex items-center justify-center mb-4">
                   <FaRobot className="text-3xl text-aurora-cyan" />
                 </div>
                 <h4 className="text-white font-semibold mb-2">Hey! I'm Lumina</h4>
-                <p className="text-white/40 text-sm mb-6">Your AI learning companion. Ask me anything about skills, tutorials, or let me create a custom lesson for you.</p>
+                <p className="text-white/40 text-sm mb-6">Your personal learning companion. Ask me anything about skills, tutorials, or let me create a custom lesson for you.</p>
                 <div className="grid gap-2 w-full">
                   {suggestions.map((s, i) => (
                     <button
@@ -180,9 +180,9 @@ const AIMentor = () => {
                           value={editText}
                           onChange={(e) => setEditText(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') submitEdit(); if (e.key === 'Escape') setEditingIdx(null); }}
-                          className="flex-1 bg-white/10 border border-aurora-blue/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-aurora-blue/50"
+                          className="flex-1 bg-white/10 border border-aurora-cyan/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-aurora-cyan/50"
                         />
-                        <button onClick={submitEdit} disabled={!editText.trim() || loading} className="p-2 rounded-lg bg-aurora-blue/20 text-aurora-cyan hover:bg-aurora-blue/30 transition-colors disabled:opacity-30">
+                        <button onClick={submitEdit} disabled={!editText.trim() || loading} className="p-2 rounded-lg bg-aurora-cyan/20 text-aurora-cyan hover:bg-aurora-cyan/30 transition-colors disabled:opacity-30">
                           <FaPaperPlane className="text-xs" />
                         </button>
                         <button onClick={() => setEditingIdx(null)} className="p-2 rounded-lg bg-white/5 text-white/40 hover:text-white/60 transition-colors">
@@ -239,7 +239,7 @@ const AIMentor = () => {
                 <div className="chat-bubble-ai px-5 py-4">
                   <div className="flex gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-aurora-cyan animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-aurora-blue animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 rounded-full bg-aurora-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-2 h-2 rounded-full bg-aurora-pink animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
@@ -261,13 +261,13 @@ const AIMentor = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder={isLoggedIn && user?.skill_level !== 'undecided' ? "Ask Lumina anything..." : "Sign in to chat..."}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
                 disabled={!isLoggedIn || user?.skill_level === 'undecided'}
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || loading || !isLoggedIn || user?.skill_level === 'undecided'}
-                className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white disabled:opacity-30 hover:shadow-lg hover:shadow-aurora-blue/20 transition-all active:scale-95"
+                className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white disabled:opacity-30 hover:shadow-lg hover:shadow-aurora-cyan/20 transition-all active:scale-95"
               >
                 <FaPaperPlane className="text-sm" />
               </button>

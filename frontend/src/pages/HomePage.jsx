@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { FaArrowRight, FaBrain, FaRocket, FaMagic, FaAtom, FaUtensils, FaCut, FaRunning, FaGuitar, FaPalette, FaChess } from 'react-icons/fa';
+import { FaArrowRight, FaBrain, FaRocket, FaMagic, FaAtom, FaUtensils, FaCut, FaRunning, FaGuitar, FaPalette, FaChess, FaRoute, FaDumbbell, FaGem } from 'react-icons/fa';
 import TutorialCard from '../components/TutorialCard';
 import TypewriterText from '../components/TypewriterText';
 
@@ -13,19 +13,41 @@ const HomePage = () => {
       icon: <FaBrain className="text-2xl" />,
       title: 'Smart Learning Mentor',
       desc: 'Chat with Lumina — get instant explanations, personalized guidance, and answers to any learning question.',
-      gradient: 'from-aurora-cyan to-aurora-blue',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
     },
     {
       icon: <FaMagic className="text-2xl" />,
-      title: 'Tutorial Generator',
-      desc: "Want to learn something we don't have? Tell Lumina and it generates a full tutorial instantly on any topic.",
-      gradient: 'from-aurora-blue to-aurora-pink',
+      title: 'Tutorial Studio',
+      desc: 'Type any topic and get a full step-by-step tutorial generated instantly. Great for quick, focused learning on a single subject.',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
+      link: '/ai-lab',
     },
     {
       icon: <FaAtom className="text-2xl" />,
       title: 'Concept Explainer',
       desc: 'Stuck on a step? Highlight any concept and get it broken down in simple terms with analogies.',
-      gradient: 'from-aurora-pink to-aurora-gold',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
+    },
+    {
+      icon: <FaRoute className="text-2xl" />,
+      title: '7-Day Journey',
+      desc: 'Set a learning goal and get a structured 7-day mission plan with daily tasks, XP, streaks, and coach check-ins.',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
+      link: '/journey',
+    },
+    {
+      icon: <FaDumbbell className="text-2xl" />,
+      title: 'Practice Simulator',
+      desc: 'Test your knowledge with quizzes, real-world scenarios, and flashcards on any topic. Timed sessions available.',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
+      link: '/practice',
+    },
+    {
+      icon: <FaGem className="text-2xl" />,
+      title: 'Dream Builder',
+      desc: 'Describe your dream career or big project and get a full roadmap with required skills, milestones, resources, and habits.',
+      gradient: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
+      link: '/dream-builder',
     },
   ];
 
@@ -43,7 +65,7 @@ const HomePage = () => {
       {/* ===== HERO ===== */}
       <section className="relative pt-20 pb-28 px-4 overflow-hidden">
         {/* Extra glow orbs */}
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-aurora-blue/10 rounded-full blur-[120px] animate-pulse-slow" />
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-aurora-cyan/10 rounded-full blur-[120px] animate-pulse-slow" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-aurora-pink/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
 
         <div className="max-w-5xl mx-auto text-center relative z-10">
@@ -65,16 +87,16 @@ const HomePage = () => {
           </h1>
 
           <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Discover tutorials on any topic, track your progress, and build real skills — all guided by AI that adapts to how you learn.
+            Discover tutorials on any topic, track your progress, and build real skills — guided by Lumina, your personal learning companion.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               to="/ai-lab"
-              className="group flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-bold text-lg shadow-2xl shadow-aurora-blue/20 hover:shadow-aurora-blue/40 transition-all hover:scale-105"
+              className="group flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-bold text-lg shadow-2xl shadow-aurora-cyan/20 hover:shadow-aurora-cyan/40 transition-all hover:scale-105"
             >
               <FaRocket className="transition-transform group-hover:-translate-y-0.5" />
-              Open AI Lab
+              Open Studio
             </Link>
             <Link
               to="/tutorials"
@@ -119,18 +141,26 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className="group glass rounded-2xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-1"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
-                  {f.icon}
+            {features.map((f, i) => {
+              const Card = (
+                <div
+                  key={i}
+                  className="group glass rounded-2xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-1"
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+                    {f.icon}
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
+                  <p className="text-white/40 text-sm leading-relaxed">{f.desc}</p>
+                  {f.link && (
+                    <span className="inline-flex items-center gap-1 text-aurora-cyan text-xs mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Explore <FaArrowRight className="text-[8px]" />
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
-                <p className="text-white/40 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
+              );
+              return f.link ? <Link key={i} to={f.link}>{Card}</Link> : Card;
+            })}
           </div>
         </div>
       </section>
@@ -182,7 +212,7 @@ const HomePage = () => {
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <div className="glass rounded-3xl p-12 relative overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-aurora-blue/10 rounded-full blur-[80px]" />
+            <div className="absolute -top-20 -right-20 w-60 h-60 bg-aurora-cyan/10 rounded-full blur-[80px]" />
             <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-aurora-pink/10 rounded-full blur-[80px]" />
 
             <div className="relative z-10">
@@ -197,7 +227,7 @@ const HomePage = () => {
                   if (!isLoggedIn) { showToast('Sign in to chat with Lumina', 'warning'); return; }
                   setChatOpen(true);
                 }}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white font-bold text-lg shadow-2xl hover:shadow-aurora-blue/30 transition-all hover:scale-105"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-bold text-lg shadow-2xl hover:shadow-aurora-cyan/30 transition-all hover:scale-105"
               >
                 <FaBrain />
                 Talk to Lumina

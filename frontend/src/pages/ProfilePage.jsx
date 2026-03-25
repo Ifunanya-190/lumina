@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { FaTrophy, FaFire, FaStar, FaArrowRight, FaSeedling, FaBolt, FaSignOutAlt, FaRedo, FaBookmark, FaUser, FaTimes } from 'react-icons/fa';
+import { FaTrophy, FaFire, FaStar, FaArrowRight, FaSeedling, FaBolt, FaSignOutAlt, FaRedo, FaBookmark, FaUser, FaTimes, FaRoute } from 'react-icons/fa';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const levelInfo = {
   beginner: { icon: <FaSeedling />, color: 'from-aurora-green to-emerald-400', label: 'Beginner' },
-  intermediate: { icon: <FaFire />, color: 'from-aurora-gold to-orange-400', label: 'Intermediate' },
+  intermediate: { icon: <FaFire />, color: 'from-aurora-cyan via-aurora-blue to-aurora-pink', label: 'Intermediate' },
   advanced: { icon: <FaBolt />, color: 'from-aurora-pink to-red-400', label: 'Advanced' },
 };
 
 const ProfilePage = () => {
-  const { user, isLoggedIn, logout, userProgress, getRecommended, favorites, cancelProgress, showToast } = useApp();
+  const { user, isLoggedIn, logout, userProgress, getRecommended, favorites, cancelProgress, showToast, api } = useApp();
   const navigate = useNavigate();
   const [recommended, setRecommended] = useState([]);
   const [recLevel, setRecLevel] = useState('');
   const [leveledUp, setLeveledUp] = useState(false);
   const [cancelId, setCancelId] = useState(null);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) { navigate('/auth'); return; }
@@ -28,8 +30,20 @@ const ProfilePage = () => {
 
   if (!isLoggedIn || !user) return null;
 
-  const completed = userProgress.filter(p => p.completed);
-  const inProgress = userProgress.filter(p => !p.completed);
+  const completed = userProgress.filter(p => p.completed && p.tutorial_id && p.title);
+  const inProgress = userProgress.filter(p => !p.completed && p.tutorial_id && p.title);
+  const orphaned = userProgress.filter(p => !p.tutorial_id || !p.title);
+
+  // Auto-cleanup orphaned progress entries
+  useEffect(() => {
+    if (orphaned.length > 0 && isLoggedIn) {
+      api().delete('/progress/cleanup/orphans').then(() => {
+        // Remove them from local state
+        const orphanIds = new Set(orphaned.map(o => o._id));
+        // Will be cleaned on next data fetch
+      }).catch(() => {});
+    }
+  }, [orphaned.length, isLoggedIn, api]);
   const info = levelInfo[user.skill_level] || levelInfo.beginner;
 
   return (
@@ -49,7 +63,7 @@ const ProfilePage = () => {
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${info.color} text-nebula-900`}>
                 {info.icon} {info.label}
               </span>
-              <span className="flex items-center gap-1 text-sm text-aurora-gold">
+              <span className="flex items-center gap-1 text-sm text-aurora-cyan">
                 <FaStar className="text-xs" /> {user.xp || user.stats?.totalXp || 0} XP
               </span>
               {user.streak_days > 0 && (
@@ -60,22 +74,28 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/journey"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl glass text-xs sm:text-sm text-white/50 hover:text-aurora-cyan hover:bg-aurora-cyan/10 transition-all"
+            >
+              <FaRoute className="text-xs" /> Journey
+            </Link>
             <Link
               to="/favorites"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-white/50 hover:text-aurora-gold hover:bg-aurora-gold/10 transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl glass text-xs sm:text-sm text-white/50 hover:text-aurora-cyan hover:bg-aurora-cyan/10 transition-all"
             >
               <FaBookmark className="text-xs" /> Favorites
             </Link>
             <Link
               to="/assessment"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl glass text-xs sm:text-sm text-white/50 hover:text-white hover:bg-white/10 transition-all"
             >
-              <FaRedo className="text-xs" /> Change Level
+              <FaRedo className="text-xs" /> Level
             </Link>
             <button
-              onClick={() => { logout(); navigate('/'); }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-white/50 hover:text-aurora-pink hover:bg-aurora-pink/10 transition-all"
+              onClick={() => setLogoutOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl glass text-xs sm:text-sm text-white/50 hover:text-aurora-pink hover:bg-aurora-pink/10 transition-all"
             >
               <FaSignOutAlt className="text-xs" /> Logout
             </button>
@@ -84,11 +104,11 @@ const ProfilePage = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
         {[
           { label: 'Completed', value: completed.length, color: 'text-aurora-green' },
-          { label: 'In Progress', value: inProgress.length, color: 'text-aurora-blue' },
-          { label: 'Total XP', value: user.xp || user.stats?.totalXp || 0, color: 'text-aurora-gold' },
+          { label: 'In Progress', value: inProgress.length, color: 'text-aurora-cyan' },
+          { label: 'Total XP', value: user.xp || user.stats?.totalXp || 0, color: 'text-aurora-cyan' },
           { label: 'Favorites', value: favorites.length, color: 'text-aurora-cyan' },
           { label: 'Achievements', value: user.achievements?.length || 0, color: 'text-aurora-pink' },
         ].map((stat, i) => (
@@ -101,9 +121,9 @@ const ProfilePage = () => {
 
       {/* Level Up Banner */}
       {leveledUp && (
-        <div className="glass rounded-2xl p-5 mb-6 border border-aurora-gold/20 bg-aurora-gold/5">
+        <div className="glass rounded-2xl p-5 mb-6 border border-aurora-cyan/20 bg-aurora-cyan/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-gold to-orange-400 flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink flex items-center justify-center text-white">
               <FaTrophy />
             </div>
             <div>
@@ -123,7 +143,7 @@ const ProfilePage = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {user.achievements.map((a, i) => (
               <div key={i} className="glass rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-aurora-gold to-aurora-pink flex items-center justify-center text-white">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink flex items-center justify-center text-white">
                   <FaTrophy />
                 </div>
                 <div>
@@ -164,7 +184,7 @@ const ProfilePage = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          cancelProgress(p.tutorial_id).then(() => { setCancelId(null); showToast('Tutorial removed from your list', 'info'); }).catch(() => showToast('Failed to remove', 'error'));
+                          cancelProgress(p.tutorial_id, p._id).then(() => { setCancelId(null); showToast('Tutorial removed from your list', 'info'); }).catch(() => showToast('Failed to remove', 'error'));
                         }}
                         className={`w-7 h-7 rounded-lg items-center justify-center text-white/30 hover:text-aurora-pink hover:bg-aurora-pink/10 transition-all ${showCancel ? 'flex' : 'hidden group-hover:flex'}`}
                         title="Remove from learning"
@@ -173,7 +193,7 @@ const ProfilePage = () => {
                       </button>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/5">
-                      <div className="h-full rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-blue transition-all" style={{ width: `${pct}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </Link>
                 </div>
@@ -191,7 +211,7 @@ const ProfilePage = () => {
             {recommended.slice(0, 3).map((t, i) => (
               <Link key={i} to={`/tutorial/${t._id}`} className="glass rounded-xl p-4 hover:bg-white/5 transition-all group">
                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase mb-2 bg-gradient-to-r ${
-                  levelInfo[t.difficulty]?.color || 'from-aurora-cyan to-aurora-blue'
+                  levelInfo[t.difficulty]?.color || 'from-aurora-cyan via-aurora-blue to-aurora-pink'
                 } text-nebula-900`}>{t.difficulty}</span>
                 <h4 className="text-white text-sm font-semibold group-hover:text-aurora-cyan transition-colors">{t.title}</h4>
                 <p className="text-white/30 text-xs mt-1 line-clamp-2">{t.description}</p>
@@ -221,6 +241,17 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Log Out"
+        message="Are you sure you want to log out? You'll need to sign in again to access your progress."
+        confirmLabel="Log Out"
+        cancelLabel="Stay"
+        variant="danger"
+        onConfirm={() => { setLogoutOpen(false); logout(); navigate('/'); }}
+        onCancel={() => setLogoutOpen(false)}
+      />
     </div>
   );
 };

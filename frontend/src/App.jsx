@@ -11,6 +11,9 @@ import AuthPage from './pages/AuthPage';
 import AssessmentPage from './pages/AssessmentPage';
 import ProfilePage from './pages/ProfilePage';
 import FavoritesPage from './pages/FavoritesPage';
+import JourneyPage from './pages/JourneyPage';
+import PracticePage from './pages/PracticePage';
+import DreamBuilderPage from './pages/DreamBuilderPage';
 
 function AppContent() {
   const { toast, dismissToast } = useApp();
@@ -31,6 +34,9 @@ function AppContent() {
             <Route path="/assessment" element={<AssessmentPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/journey" element={<JourneyPage />} />
+            <Route path="/practice" element={<PracticePage />} />
+            <Route path="/dream-builder" element={<DreamBuilderPage />} />
           </Routes>
         </main>
       </div>

@@ -32,7 +32,7 @@ const questions = [
 
 const levels = [
   { key: 'beginner', icon: <FaSeedling />, name: 'Beginner', color: 'from-aurora-green to-emerald-400', desc: 'Start from scratch with step-by-step guidance. Perfect for discovering new interests.', shadow: 'shadow-aurora-green/20' },
-  { key: 'intermediate', icon: <FaFire />, name: 'Intermediate', color: 'from-aurora-gold to-orange-400', desc: 'You know the basics. Dive deeper with more challenging tutorials and techniques.', shadow: 'shadow-aurora-gold/20' },
+  { key: 'intermediate', icon: <FaFire />, name: 'Intermediate', color: 'from-aurora-cyan via-aurora-blue to-aurora-pink', desc: 'You know the basics. Dive deeper with more challenging tutorials and techniques.', shadow: 'shadow-aurora-cyan/20' },
   { key: 'advanced', icon: <FaBolt />, name: 'Advanced', color: 'from-aurora-pink to-red-400', desc: 'Push your limits with expert-level content and complex projects.', shadow: 'shadow-aurora-pink/20' },
 ];
 
@@ -83,7 +83,7 @@ const AssessmentPage = () => {
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-aurora-blue to-aurora-pink mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink mb-4">
             <FaBrain className="text-white text-xl" />
           </div>
           <h1 className="text-3xl font-black text-white mb-2">
@@ -100,7 +100,7 @@ const AssessmentPage = () => {
         {step < questions.length && (
           <div className="h-1.5 rounded-full bg-white/5 mb-8 max-w-md mx-auto">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-blue transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink transition-all duration-500"
               style={{ width: `${((step + 1) / questions.length) * 100}%` }}
             />
           </div>
@@ -115,7 +115,7 @@ const AssessmentPage = () => {
                 <button
                   key={i}
                   onClick={() => handleAnswer(opt.value)}
-                  className="w-full text-left px-5 py-4 rounded-xl glass hover:bg-white/10 hover:border-aurora-blue/30 transition-all duration-300 group"
+                  className="w-full text-left px-5 py-4 rounded-xl glass hover:bg-white/10 hover:border-aurora-cyan/30 transition-all duration-300 group"
                 >
                   <span className="text-white/70 group-hover:text-white text-sm">{opt.text}</span>
                 </button>
@@ -148,7 +148,7 @@ const AssessmentPage = () => {
                     }`}
                   >
                     {isRecommended && (
-                      <span className="absolute -top-2.5 right-4 px-3 py-0.5 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-blue text-[10px] font-bold text-white uppercase tracking-wider">
+                      <span className="absolute -top-2.5 right-4 px-3 py-0.5 rounded-full bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-[10px] font-bold text-white uppercase tracking-wider">
                         Recommended
                       </span>
                     )}

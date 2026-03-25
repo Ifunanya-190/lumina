@@ -79,6 +79,10 @@ export function AppProvider({ children }) {
       api().get('/progress').then(r => setUserProgress(r.data)).catch(() => {});
       api().get('/auth/me').then(r => setUser(prev => ({ ...prev, ...r.data }))).catch(() => {});
       api().get('/tutorials/favorites').then(r => setFavorites(r.data)).catch(() => {});
+      // Ping activity to keep streak alive
+      api().post('/auth/activity').then(r => {
+        setUser(prev => prev ? { ...prev, streak_days: r.data.streak_days, last_active: r.data.last_active } : prev);
+      }).catch(() => {});
     }
   }, [token, api]);
 
@@ -178,6 +182,20 @@ export function AppProvider({ children }) {
     return data;
   };
 
+  const deleteTutorial = async (id) => {
+    if (!requireAuth('delete tutorials')) return;
+    try {
+      await api().delete(`/tutorials/${id}`);
+      setTutorials(prev => prev.filter(t => t._id !== id));
+      setFavorites(prev => prev.filter(f => f._id !== id));
+      if (stats) setStats(s => ({ ...s, totalTutorials: Math.max(0, s.totalTutorials - 1) }));
+      showToast('Tutorial deleted', 'info');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Failed to delete tutorial';
+      showToast(msg, 'error');
+    }
+  };
+
   const clearChat = async () => {
     await api().delete('/ai/history');
     setChatMessages([]);
@@ -202,9 +220,15 @@ export function AppProvider({ children }) {
     return data;
   };
 
-  const cancelProgress = async (tutorialId) => {
-    await api().delete(`/progress/${tutorialId}`);
-    setUserProgress(prev => prev.filter(p => p.tutorial_id !== tutorialId));
+  const cancelProgress = async (tutorialId, progressId) => {
+    if (tutorialId) {
+      await api().delete(`/progress/${tutorialId}`);
+      setUserProgress(prev => prev.filter(p => p.tutorial_id !== tutorialId));
+    } else if (progressId) {
+      // Orphaned progress — clean up via refetch
+      await api().delete('/progress/cleanup/orphans');
+      setUserProgress(prev => prev.filter(p => p._id !== progressId));
+    }
   };
 
   return (
@@ -217,12 +241,13 @@ export function AppProvider({ children }) {
       // Tutorials
       tutorials, loading, stats, aiStatus,
       chatOpen, setChatOpen, chatMessages, setChatMessages, sendChat, clearChat,
-      generateTutorial, explainConcept, likeTutorial, fetchTutorials,
+      generateTutorial, explainConcept, likeTutorial, fetchTutorials, deleteTutorial,
       // Favorites
       favorites, toggleFavorite, isFavorited,
       // Progress
       userProgress, updateProgress, getRecommended, cancelProgress,
-      API
+      // Utilities
+      api, API
     }}>
       {children}
     </AppContext.Provider>

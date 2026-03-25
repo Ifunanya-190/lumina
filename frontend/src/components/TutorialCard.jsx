@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaClock, FaHeart, FaEye, FaBookmark, FaRegBookmark, FaUtensils, FaCut, FaRunning, FaGuitar, FaPalette, FaChess, FaLaptopCode, FaFlask, FaLanguage, FaLeaf, FaBook } from 'react-icons/fa';
+import { FaClock, FaHeart, FaEye, FaBookmark, FaRegBookmark, FaTimes, FaUtensils, FaCut, FaRunning, FaGuitar, FaPalette, FaChess, FaLaptopCode, FaFlask, FaLanguage, FaLeaf, FaBook } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import ConfirmDialog from './ConfirmDialog';
 
 const diffColors = {
   beginner: 'from-aurora-green to-emerald-400 text-nebula-900',
-  intermediate: 'from-aurora-gold to-orange-400 text-nebula-900',
+  intermediate: 'from-aurora-cyan via-aurora-blue to-aurora-pink text-white',
   advanced: 'from-aurora-pink to-red-400 text-white',
 };
 
@@ -15,14 +17,40 @@ const catIcons = {
 };
 
 const TutorialCard = ({ tutorial }) => {
-  const { likeTutorial, toggleFavorite, isFavorited } = useApp();
+  const { likeTutorial, toggleFavorite, isFavorited, deleteTutorial, isLoggedIn } = useApp();
   const colors = diffColors[tutorial.difficulty] || diffColors.beginner;
+  const [showDelete, setShowDelete] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setConfirmOpen(false);
+    await deleteTutorial(tutorial._id);
+  };
 
   return (
+    <>
     <Link
       to={`/tutorial/${tutorial._id}`}
-      className="group block glass rounded-2xl overflow-hidden transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-aurora-blue/10"
+      className="group block glass rounded-2xl overflow-hidden transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-aurora-cyan/10 relative"
+      onClick={() => setShowDelete(false)}
     >
+        {/* Delete button */}
+        {isLoggedIn && (
+        <button
+          onClick={handleDelete}
+          onTouchStart={(e) => { e.stopPropagation(); setShowDelete(true); }}
+          className="absolute top-3 right-3 z-20 w-7 h-7 rounded-lg bg-nebula-900/80 border border-white/10 flex items-center justify-center text-white/40 hover:text-aurora-pink hover:bg-aurora-pink/20 hover:border-aurora-pink/30 transition-all duration-200 backdrop-blur-sm opacity-70 hover:opacity-100"
+          title="Delete tutorial"
+        >
+          <FaTimes className="text-xs" />
+        </button>
+      )}
       {/* Top gradient accent */}
       <div className={`h-1 bg-gradient-to-r ${colors}`} />
 
@@ -54,7 +82,7 @@ const TutorialCard = ({ tutorial }) => {
         <div className="flex items-center justify-between text-xs text-white/30">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <FaClock className="text-aurora-blue" /> {tutorial.duration}
+              <FaClock className="text-aurora-cyan" /> {tutorial.duration}
             </span>
             {tutorial.views > 0 && (
               <span className="flex items-center gap-1">
@@ -66,7 +94,7 @@ const TutorialCard = ({ tutorial }) => {
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(tutorial._id); }}
               className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
-                isFavorited(tutorial._id) ? 'text-aurora-gold' : 'text-white/30 hover:text-aurora-gold hover:bg-white/5'
+                isFavorited(tutorial._id) ? 'text-aurora-cyan' : 'text-white/30 hover:text-aurora-cyan hover:bg-white/5'
               }`}
             >
               {isFavorited(tutorial._id) ? <FaBookmark /> : <FaRegBookmark />}
@@ -81,6 +109,17 @@ const TutorialCard = ({ tutorial }) => {
         </div>
       </div>
     </Link>
+    <ConfirmDialog
+      open={confirmOpen}
+      title="Delete Tutorial"
+      message="Are you sure you want to delete this tutorial? This action cannot be undone."
+      confirmLabel="Delete"
+      cancelLabel="Keep"
+      variant="danger"
+      onConfirm={confirmDelete}
+      onCancel={() => setConfirmOpen(false)}
+    />
+    </>
   );
 };
 

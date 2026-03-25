@@ -8,7 +8,7 @@ import TypingMessage from '../components/TypingMessage';
 
 const diffGradient = {
   beginner: 'from-aurora-green to-emerald-400',
-  intermediate: 'from-aurora-gold to-orange-400',
+  intermediate: 'from-aurora-cyan via-aurora-blue to-aurora-pink',
   advanced: 'from-aurora-pink to-red-400',
 };
 
@@ -124,7 +124,7 @@ const TutorialDetailPage = () => {
           <p className="text-white/50 text-lg leading-relaxed mb-6">{tutorial.description}</p>
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-white/30">
-            <span className="flex items-center gap-1.5"><FaClock className="text-aurora-blue" /> {tutorial.duration}</span>
+            <span className="flex items-center gap-1.5"><FaClock className="text-aurora-cyan" /> {tutorial.duration}</span>
             <span className="flex items-center gap-1.5"><FaHeart className="text-aurora-pink" /> {tutorial.likes} likes</span>
             {tutorial.tags && tutorial.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
@@ -194,7 +194,7 @@ const TutorialDetailPage = () => {
           {/* AI Explain */}
           <div className="glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <FaLightbulb className="text-aurora-gold" />
+              <FaLightbulb className="text-aurora-cyan" />
               <h3 className="text-sm font-bold text-white">Concept Explainer</h3>
             </div>
             <p className="text-xs text-white/30 mb-3">Type any concept from the tutorial and get it explained simply.</p>
@@ -203,12 +203,12 @@ const TutorialDetailPage = () => {
                 name="concept"
                 type="text"
                 placeholder="e.g. 'petal fold' or 'wet-on-wet'"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-aurora-blue/50 mb-3"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-aurora-cyan/50 mb-3"
               />
               <button
                 type="submit"
                 disabled={explaining}
-                className="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white text-sm font-semibold disabled:opacity-40 hover:shadow-lg transition-all"
+                className="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white text-sm font-semibold disabled:opacity-40 hover:shadow-lg transition-all"
               >
                 {explaining ? 'Thinking...' : 'Explain This'}
               </button>
@@ -249,7 +249,7 @@ const TutorialDetailPage = () => {
             <button
               onClick={() => toggleFavorite(tutorial._id)}
               className={`flex-1 glass rounded-2xl p-4 flex items-center justify-center gap-2 text-sm transition-all ${
-                isFavorited(tutorial._id) ? 'text-aurora-gold bg-aurora-gold/5' : 'text-white/40 hover:text-aurora-gold hover:bg-white/5'
+                isFavorited(tutorial._id) ? 'text-aurora-cyan bg-aurora-cyan/5' : 'text-white/40 hover:text-aurora-cyan hover:bg-white/5'
               }`}
             >
               {isFavorited(tutorial._id) ? <FaBookmark /> : <FaRegBookmark />}
@@ -269,7 +269,7 @@ const TutorialDetailPage = () => {
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Tutorial Completed! 🎉</h3>
           <p className="text-white/40 text-sm mb-1">
-            You earned <span className="text-aurora-gold font-bold">+{tutorial.difficulty === 'advanced' ? 200 : tutorial.difficulty === 'intermediate' ? 100 : 50} XP</span>
+            You earned <span className="text-aurora-cyan font-bold">+{tutorial.difficulty === 'advanced' ? 200 : tutorial.difficulty === 'intermediate' ? 100 : 50} XP</span>
           </p>
 
           {nextTutorial ? (
@@ -277,7 +277,7 @@ const TutorialDetailPage = () => {
               <p className="text-white/30 text-xs mb-3 uppercase tracking-wider">Recommended Next</p>
               <Link
                 to={`/tutorial/${nextTutorial._id}`}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-semibold hover:shadow-lg transition-all"
               >
                 {nextTutorial.title} <FaArrowRight className="text-sm" />
               </Link>

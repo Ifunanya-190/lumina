@@ -16,8 +16,10 @@ router.get('/', auth, async (req, res) => {
       .populate('tutorial', 'title category difficulty')
       .sort('-createdAt');
 
-    // Flatten for frontend compatibility
-    const result = progress.map(p => ({
+    // Flatten for frontend compatibility, filter out orphaned progress (deleted tutorials)
+    const result = progress
+      .filter(p => p.tutorial && p.tutorial._id)
+      .map(p => ({
       _id: p._id,
       tutorial_id: p.tutorial?._id,
       title: p.tutorial?.title,
@@ -152,6 +154,22 @@ router.get('/recommended', auth, async (req, res) => {
     res.json({ recommended, userLevel: recommendedDifficulty, allCurrentLevelDone: allCurrentDone });
   } catch (err) {
     console.error('Get recommended error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE orphaned progress entries (tutorials that no longer exist)
+// NOTE: Must be defined BEFORE /:tutorialId to avoid Express matching "cleanup" as a param
+router.delete('/cleanup/orphans', auth, async (req, res) => {
+  try {
+    const progress = await UserProgress.find({ user: req.user.id }).populate('tutorial', '_id');
+    const orphanIds = progress.filter(p => !p.tutorial).map(p => p._id);
+    if (orphanIds.length > 0) {
+      await UserProgress.deleteMany({ _id: { $in: orphanIds } });
+    }
+    res.json({ removed: orphanIds.length });
+  } catch (err) {
+    console.error('Cleanup orphans error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -119,6 +119,19 @@ router.post('/:id/like', auth, async (req, res) => {
   }
 });
 
+// DELETE an AI-generated tutorial
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const tutorial = await Tutorial.findById(req.params.id);
+    if (!tutorial) return res.status(404).json({ error: 'Tutorial not found' });
+    await tutorial.deleteOne();
+    res.json({ success: true, id: req.params.id });
+  } catch (err) {
+    if (err.name === 'CastError') return res.status(400).json({ error: 'Invalid ID' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // POST toggle favorite
 router.post('/:id/favorite', auth, async (req, res) => {
   try {

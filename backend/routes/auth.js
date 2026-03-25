@@ -35,6 +35,33 @@ function optionalAuth(req, res, next) {
   next();
 }
 
+// Helper: update streak on activity
+async function trackActivity(userId) {
+  const user = await User.findById(userId);
+  if (!user) return null;
+  const today = new Date().toISOString().split('T')[0];
+  const lastActive = user.last_active ? new Date(user.last_active).toISOString().split('T')[0] : null;
+  if (lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    user.streak_days = lastActive === yesterday ? user.streak_days + 1 : 1;
+    user.last_active = new Date();
+    await user.save();
+  }
+  return user;
+}
+
+// POST /activity — frontend pings this to keep streak alive
+router.post('/activity', auth, async (req, res) => {
+  try {
+    const user = await trackActivity(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ streak_days: user.streak_days, last_active: user.last_active });
+  } catch (err) {
+    console.error('Activity tracking error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // POST /signup
 router.post('/signup', async (req, res) => {
   try {
@@ -107,15 +134,8 @@ router.post('/login', async (req, res) => {
     }
 
     // Update last active & streak
-    const today = new Date().toISOString().split('T')[0];
-    const lastActive = user.last_active ? new Date(user.last_active).toISOString().split('T')[0] : null;
-    if (lastActive !== today) {
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-      const newStreak = lastActive === yesterday ? user.streak_days + 1 : 1;
-      user.last_active = new Date();
-      user.streak_days = newStreak;
-      await user.save();
-    }
+    await trackActivity(user._id);
+    await user.save();
 
     const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 

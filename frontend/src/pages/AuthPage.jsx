@@ -52,14 +52,14 @@ const AuthPage = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink mb-4 shadow-lg shadow-aurora-blue/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-aurora-cyan via-aurora-blue to-aurora-pink mb-4 shadow-lg shadow-aurora-cyan/30">
             <FaBrain className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-black text-white mb-1">
             {mode === 'login' ? 'Welcome Back' : 'Join Lumina'}
           </h1>
           <p className="text-white/40 text-sm">
-            {mode === 'login' ? 'Sign in to continue your learning journey' : 'Start your AI-powered learning adventure'}
+            {mode === 'login' ? 'Sign in to continue your learning journey' : 'Start your personalized learning adventure'}
           </p>
         </div>
 
@@ -75,7 +75,7 @@ const AuthPage = () => {
                   value={form.display_name}
                   onChange={handleChange}
                   placeholder="How should we call you?"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
                 />
               </div>
             )}
@@ -91,7 +91,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 placeholder={mode === 'login' ? 'Enter username or email' : 'Choose a username'}
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
               />
             </div>
 
@@ -105,7 +105,7 @@ const AuthPage = () => {
                   onChange={handleChange}
                   placeholder="your@email.com"
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
                 />
               </div>
             )}
@@ -121,7 +121,7 @@ const AuthPage = () => {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white text-sm placeholder-white/20 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
                 />
                 <button
                   type="button"
@@ -142,7 +142,7 @@ const AuthPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-bold text-sm shadow-lg shadow-aurora-blue/20 disabled:opacity-50 hover:shadow-aurora-blue/40 transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-aurora-cyan via-aurora-blue to-aurora-pink text-white font-bold text-sm shadow-lg shadow-aurora-cyan/20 disabled:opacity-50 hover:shadow-aurora-cyan/40 transition-all active:scale-[0.98]"
             >
               {loading ? (
                 <div className="flex gap-1">

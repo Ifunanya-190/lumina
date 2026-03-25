@@ -41,39 +41,33 @@ function withTimeout(promise, ms) {
 let lastRateLimitTime = 0;
 
 // Retry helper — retries with short waits to let rate limits clear
-async function aiGenerate(fn, timeoutMs = 25000) {
-  // If we were rate-limited in the last 30 seconds, wait before even trying
+async function aiGenerate(fn, timeoutMs = 15000) {
+  // If we were rate-limited in the last 15 seconds, wait before even trying
   const timeSinceLimit = Date.now() - lastRateLimitTime;
-  if (timeSinceLimit < 30000) {
-    const waitMs = 30000 - timeSinceLimit;
+  if (timeSinceLimit < 15000) {
+    const waitMs = 15000 - timeSinceLimit;
     console.log(`Cooling down ${Math.ceil(waitMs / 1000)}s from last rate limit...`);
     await new Promise(r => setTimeout(r, waitMs));
   }
 
   const errors = [];
-  for (let attempt = 0; attempt < 2; attempt++) {
-    for (const modelName of MODEL_CHAIN) {
-      try {
-        const currentModel = genAI.getGenerativeModel({ model: modelName });
-        const result = await withTimeout(fn(currentModel), timeoutMs);
-        if (modelName !== activeModelName) {
-          activeModelName = modelName;
-          model = currentModel;
-        }
-        return result;
-      } catch (err) {
-        const is429 = err.message && err.message.includes('429');
-        const isTimeout = err.message?.includes('timed out');
-        console.error(`AI attempt ${attempt + 1} with ${modelName}:`, err.message?.substring(0, 150));
-        errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
-        if (is429) lastRateLimitTime = Date.now();
-        if (!is429 && !isTimeout) throw err;
+  // Single pass through model chain — no full retry to keep responses fast
+  for (const modelName of MODEL_CHAIN) {
+    try {
+      const currentModel = genAI.getGenerativeModel({ model: modelName });
+      const result = await withTimeout(fn(currentModel), timeoutMs);
+      if (modelName !== activeModelName) {
+        activeModelName = modelName;
+        model = currentModel;
       }
-    }
-    // Wait before retrying all models again
-    if (attempt < 1) {
-      console.log('All models rate-limited. Waiting 15s before retry...');
-      await new Promise(r => setTimeout(r, 15000));
+      return result;
+    } catch (err) {
+      const is429 = err.message && err.message.includes('429');
+      const isTimeout = err.message?.includes('timed out');
+      console.error(`AI attempt with ${modelName}:`, err.message?.substring(0, 150));
+      errors.push(`${modelName}: ${err.message?.substring(0, 80)}`);
+      if (is429) lastRateLimitTime = Date.now();
+      if (!is429 && !isTimeout) throw err;
     }
   }
   throw new Error('AI rate limited — all models are temporarily unavailable. Please wait a minute and try again.');
@@ -102,17 +96,25 @@ router.post('/chat', auth, async (req, res) => {
 
   const userId = req.user.id;
 
+  // Internal contexts used by feature pages — these should NOT be saved to chat history
+  const INTERNAL_CONTEXTS = ['dream_builder', 'practice_simulator', 'practice_evaluator', 'journey_generator', 'journey_coach'];
+  const isInternal = INTERNAL_CONTEXTS.includes(context);
+
   // Look up the user's display name from the database
   const dbUser = await User.findById(userId).select('display_name username');
   const displayName = dbUser?.display_name || dbUser?.username || '';
 
-  await ChatHistory.create({ user: userId, role: 'user', content: message, context: context || null });
+  // Only save to chat history if it's a real chat message, not an internal feature request
+  if (!isInternal) {
+    await ChatHistory.create({ user: userId, role: 'user', content: message, context: context || null });
+  }
 
   try {
     let reply;
 
     if (genAI) {
-      const history = await ChatHistory.find({ user: userId }).sort('-createdAt').limit(11);
+      // For chat history, only load real chat messages (not internal feature requests)
+      const history = isInternal ? [] : await ChatHistory.find({ user: userId, context: { $nin: INTERNAL_CONTEXTS } }).sort('-createdAt').limit(11);
       const ordered = history.reverse();
 
       let chatHistory = ordered.slice(0, -1).map(h => ({
@@ -126,9 +128,13 @@ router.post('/chat', auth, async (req, res) => {
 
       let systemText = SYSTEM_PROMPT;
       if (displayName) systemText += `\n\nThe user's name is ${displayName}. Address them by name when greeting.`;
-      if (context) systemText += `\n\nCurrent context: The user is viewing: ${context}`;
+      if (context && !isInternal) systemText += `\n\nCurrent context: The user is viewing: ${context}`;
 
       const result = await aiGenerate(async (currentModel) => {
+        if (isInternal) {
+          // For internal feature requests, use direct generation (no chat history)
+          return currentModel.generateContent(message);
+        }
         const chat = currentModel.startChat({
           history: chatHistory,
           systemInstruction: { role: 'user', parts: [{ text: systemText }] },
@@ -141,12 +147,18 @@ router.post('/chat', auth, async (req, res) => {
       reply = getFallbackResponse(message);
     }
 
-    await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
+    if (!isInternal) {
+      await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
+    }
 
     res.json({ reply, ai_powered: !!genAI });
   } catch (err) {
     console.error('AI chat error:', err.message);
-    const reply = `**Lumina is temporarily busy** — The AI is rate-limited right now.\n\nPlease wait about 30-60 seconds and try again. Your question was great, I just need a moment!\n\n_Error: ${err.message?.substring(0, 100)}_`;
+    if (isInternal) {
+      // For internal requests, return a proper error status
+      return res.status(503).json({ error: 'Lumina is temporarily busy. Please wait a moment and try again.' });
+    }
+    const reply = `**Lumina is temporarily busy** — please wait about 30-60 seconds and try again. Your question was great, I just need a moment!`;
     await ChatHistory.create({ user: userId, role: 'assistant', content: reply });
     res.json({ reply, ai_powered: false, rate_limited: true });
   }
@@ -249,11 +261,12 @@ router.post('/explain', async (req, res) => {
   }
 });
 
-// GET chat history
+// GET chat history (excludes internal feature contexts)
 router.get('/history', auth, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
-    const history = await ChatHistory.find({ user: req.user.id }).sort('-createdAt').limit(limit);
+    const INTERNAL_CONTEXTS = ['dream_builder', 'practice_simulator', 'practice_evaluator', 'journey_generator', 'journey_coach'];
+    const history = await ChatHistory.find({ user: req.user.id, context: { $nin: INTERNAL_CONTEXTS } }).sort('-createdAt').limit(limit);
     res.json(history.reverse());
   } catch (err) {
     res.status(500).json({ error: 'Server error' });

@@ -15,7 +15,7 @@ const SearchAndFilter = ({ filters, onFilterChange }) => {
           <input
             type="text"
             placeholder="Search tutorials..."
-            className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-aurora-blue/50 focus:ring-1 focus:ring-aurora-blue/30 transition-all"
+            className="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-aurora-cyan/50 focus:ring-1 focus:ring-aurora-cyan/30 transition-all"
             value={filters.search}
             onChange={(e) => onFilterChange('search', e.target.value)}
           />
@@ -28,7 +28,7 @@ const SearchAndFilter = ({ filters, onFilterChange }) => {
 
         {/* Category */}
         <select
-          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 focus:outline-none focus:border-aurora-blue/50 appearance-none cursor-pointer min-w-[140px]"
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 focus:outline-none focus:border-aurora-cyan/50 appearance-none cursor-pointer min-w-[140px]"
           value={filters.category}
           onChange={(e) => onFilterChange('category', e.target.value)}
         >
@@ -41,7 +41,7 @@ const SearchAndFilter = ({ filters, onFilterChange }) => {
 
         {/* Difficulty */}
         <select
-          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 focus:outline-none focus:border-aurora-blue/50 appearance-none cursor-pointer min-w-[140px]"
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 focus:outline-none focus:border-aurora-cyan/50 appearance-none cursor-pointer min-w-[140px]"
           value={filters.difficulty}
           onChange={(e) => onFilterChange('difficulty', e.target.value)}
         >
@@ -67,7 +67,7 @@ const SearchAndFilter = ({ filters, onFilterChange }) => {
       {hasActive && (
         <div className="mt-3 flex flex-wrap gap-2">
           {filters.search && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-aurora-blue/10 text-aurora-cyan text-xs border border-aurora-blue/20">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-aurora-cyan/10 text-aurora-cyan text-xs border border-aurora-cyan/20">
               "{filters.search}"
               <button onClick={() => onFilterChange('search', '')}><FaTimes className="text-[10px]" /></button>
             </span>
